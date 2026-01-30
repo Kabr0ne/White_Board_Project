@@ -1,0 +1,9 @@
+body { 
+    margin: 0; 
+    overflow: hidden; /* pas de scrollbars */
+}
+#whiteboard { 
+    display: block; 
+    background: #fff; 
+    cursor: crosshair; 
+}
