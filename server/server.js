@@ -11,12 +11,29 @@ const port = 3000;
 
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
+
+/*
+    Stockage de l'historique des dessins dans un tableau
+    Peut causer des problèmes de performances -> Stocké dans la RAM
+*/
+const drawingHistory = []; 
+
 io.on('connection', (user) => {
     console.log(`Nouvel utilisateur connecté : ${user.id}`);
 
+    user.emit('init-history', drawingHistory); //MAJ Canva avec l'historique des dessins 
+
     //Broadcast vers tout les users sauf le dessinateur
     user.on('drawing', (data)=> {
+
+        drawingHistory.push(data); //Ajout du dessin à l'historique 
         user.broadcast.emit('drawing', data);
+        console.log(drawingHistory)
+    })
+
+    //La fonction OnResize demande l'historique
+    user.on('resize-canvas', () => {
+        user.emit('init-history', drawingHistory);
     })
 })
 
