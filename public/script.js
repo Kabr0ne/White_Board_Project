@@ -2,9 +2,17 @@ const socket = io();
 const whiteboard = document.getElementById('whiteboard');
 const context = whiteboard.getContext('2d');
 
+
+//Infinite Canva
 let offSetCamera = { x: 0, y: 0};
 let isPanning = false;
 let lastMousePosition = { x: 0, y: 0 };
+
+//Zoom
+let scale = 1;
+const zoomSensitivity = 0.001;
+const minScale = 0.1;
+const maxScale = 6;
 
 whiteboard.width = window.innerWidth;
 whiteboard.height = window.innerHeight;
@@ -34,8 +42,8 @@ let drawing = false;
             console.log("début du dessin")
             drawing = true;
             const data = {
-                x: d.clientX - offSetCamera.x,
-                y: d.clientY - offSetCamera.y,
+                x: (d.clientX - offSetCamera.x) / scale,
+                y: (d.clientY - offSetCamera.y) / scale,
                 newStroke: true
             };
             window.localHistory.push(data);
@@ -55,8 +63,8 @@ let drawing = false;
         }
         if(drawing){ 
             const data = {
-                x: d.clientX - offSetCamera.x,
-                y: d.clientY - offSetCamera.y,
+                x: (d.clientX - offSetCamera.x) / scale,
+                y: (d.clientY - offSetCamera.y) / scale,
                 newStroke: false
             };
             window.localHistory.push(data);
@@ -74,6 +82,22 @@ let drawing = false;
             context.beginPath();
         }
     })
+
+    //Scroll_in, Scroll_out
+    whiteboard.addEventListener('wheel', (d) => {
+        const mouseLocation = { x: d.clientX, y: d.clientY};
+        const zoomAmount = 1 - d.deltaY * zoomSensitivity;
+        const newScale = Math.min(maxScale, Math.max(minScale, scale * zoomAmount));
+
+        //Zoom vers le curseur
+        const ratio = newScale / scale;
+        offSetCamera.x = mouseLocation.x - ((mouseLocation.x - offSetCamera.x) * ratio);
+        offSetCamera.y = mouseLocation.y - ((mouseLocation.y - offSetCamera.y) * ratio);
+
+        scale = newScale;
+        renderAll();
+    });
+
 
     //Redimension de la fenêtre
     window.addEventListener('resize', onResize);
@@ -112,6 +136,7 @@ function renderAll() {
     context.clearRect(0, 0, whiteboard.width, whiteboard.height);
     context.save();
     context.translate(offSetCamera.x, offSetCamera.y);//mouvement caméra
+    context.scale(scale, scale);
     
     //Style du trait
     style1();
