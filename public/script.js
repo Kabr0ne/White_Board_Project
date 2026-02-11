@@ -135,16 +135,86 @@ socket.on('init-history', (history) => {
 function renderAll() {
     context.clearRect(0, 0, whiteboard.width, whiteboard.height);
     context.save();
-    context.translate(offSetCamera.x, offSetCamera.y);//mouvement caméra
+    context.translate(offSetCamera.x, offSetCamera.y);
     context.scale(scale, scale);
-    
-    //Style du trait
-    style1();
 
-    if(window.localHistory){
-        window.localHistory.forEach((data) => {
-            draw(data.x, data.y, data.newStroke);
-        });
+    if (window.localHistory.length > 0) {
+        for (let i = 0; i < window.localHistory.length; i++) {
+            const point = window.localHistory[i];
+            
+            if (point.newStroke) {
+                context.beginPath();
+                context.moveTo(point.x, point.y);
+            } else {
+                const prevPoint = window.localHistory[i-1];
+                if (prevPoint) {
+                    context.beginPath();
+                    context.moveTo(prevPoint.x, prevPoint.y);
+                    context.lineTo(point.x, point.y);
+                    context.strokeStyle = point.color;
+                    context.lineWidth = point.size;
+                    context.lineCap = 'round';
+                    context.stroke();
+                }
+            }
+        }
     }
     context.restore();
+}
+
+//Frontend
+const fabToolbar = document.getElementById('fab-toolbar');
+const fabTrigger = document.getElementById('fabTrigger');
+
+fabTrigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (fabToolbar.classList.contains('closed')) {
+        fabToolbar.classList.remove('closed');
+        fabToolbar.classList.add('open');
+    } else {
+        fabToolbar.classList.remove('open');
+        fabToolbar.classList.add('closed');
+    }
+});
+
+fabToolbar.addEventListener('mousedown', (e) => e.stopPropagation());
+
+// Boutons
+const penBtn = document.getElementById('penBtn');
+const eraserBtn = document.getElementById('eraserBtn');
+const colorInput = document.getElementById('colorPicker');
+const sizeInput = document.getElementById('sizePicker');
+
+let currentTool = 'pen';
+
+penBtn.addEventListener('click', () => {
+    currentTool = 'pen';
+    context.strokeStyle = colorInput.value;
+    updateUI();
+});
+
+eraserBtn.addEventListener('click', () => {
+    currentTool = 'eraser';
+    context.strokeStyle = '#ffffff';
+    updateUI();
+});
+
+colorInput.addEventListener('input', (e) => {
+    currentTool = 'pen';
+    context.strokeStyle = e.target.value;
+    updateUI();
+});
+
+sizeInput.addEventListener('input', (e) => {
+    context.lineWidth = e.target.value;
+});
+
+function updateUI() {
+    if (currentTool === 'pen') {
+        penBtn.classList.add('active');
+        eraserBtn.classList.remove('active');
+    } else {
+        eraserBtn.classList.add('active');
+        penBtn.classList.remove('active');
+    }
 }
