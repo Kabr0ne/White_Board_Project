@@ -44,7 +44,9 @@ let drawing = false;
             const data = {
                 x: (d.clientX - offSetCamera.x) / scale,
                 y: (d.clientY - offSetCamera.y) / scale,
-                newStroke: true
+                newStroke: true,
+                color: context.strokeStyle,
+                size: context.lineWidth
             };
             window.localHistory.push(data);
             socket.emit('drawing', data);
@@ -62,14 +64,43 @@ let drawing = false;
             return;
         }
         if(drawing){ 
+
+            const CoorWorldX = (d.clientX - offSetCamera.x) / scale;
+            const CoorWorldY = (d.clientY - offSetCamera.y) / scale;
+
+            const lastpoint = window.localHistory[window.localHistory.length - 1];
+            if(lastpoint){
+                const distance = Math.hypot(CoorWorldX - lastpoint.x, CoorWorldY - lastpoint.y);
+                if(distance < 3){return;}; //distance minimale pour dessiner
+            } 
             const data = {
                 x: (d.clientX - offSetCamera.x) / scale,
                 y: (d.clientY - offSetCamera.y) / scale,
-                newStroke: false
+                newStroke: false,
+                color: context.strokeStyle,
+                size: context.lineWidth
             };
             window.localHistory.push(data);
             socket.emit('drawing', data);
-            renderAll();
+
+            //Evite la surcharge du serveur (pas de renderAll())
+            if (lastpoint) {
+                context.save();
+                context.translate(offSetCamera.x, offSetCamera.y);
+                context.scale(scale, scale);
+                
+                context.beginPath();
+                context.moveTo(lastPoint.x, lastPoint.y);
+                context.lineTo(worldX, worldY);
+                
+                // On s'assure d'utiliser le style actuel
+                context.strokeStyle = data.color;
+                context.lineWidth = data.size;
+                context.lineCap = 'round';
+                
+                context.stroke();
+                context.restore();
+        }
         }
     });
 
@@ -141,10 +172,35 @@ function renderAll() {
     //Style du trait
     style1();
 
-    if(window.localHistory){
-        window.localHistory.forEach((data) => {
-            draw(data.x, data.y, data.newStroke);
-        });
+    if(!window.localHistory || window.localHistory.length === 0){
+            context.restore();
+            return;
+    };
+
+    let currentPoint = window.localHistory[0];
+    context.beginPath();
+    context.moveTo(currentPoint.x, currentPoint.y);
+
+    for (let i = 1; i < window.localHistory.length; i++) {
+        const p = window.localHistory[i];
+        const lineChanged = (p.color && p.color !== currentPoint.color) || (p.size && p.size !== currentPoint.size);
+
+        if (lineChanged || p.newStroke) {
+            context.stroke();
+
+            context.beginPath();
+            context.moveTo(p.x, p.y);
+
+            if (lineChanged) {
+                if (p.color) context.strokeStyle = p.color;
+                if (p.size) context.lineWidth = p.size;
+            }
+        } else {
+            context.lineTo(p.x, p.y);
+        }
+        currentPoint = p;
+
     }
+    context.stroke();
     context.restore();
 }
