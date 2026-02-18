@@ -6,6 +6,37 @@
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+    <div id="fab-toolbar" class="fab-toolbar closed">
+        
+        <div class="fab-trigger" id="fabTrigger">
+           <img src="img/Toolbox.svg" alt="Toolbox" class="fab-icon">
+        </div>
+
+        <div class="fab-options">
+        
+            <button id="penBtn" class="tool-btn active" title="Crayon">✏️</button>
+            
+            <button id="eraserBtn" class="tool-btn" title="Gomme">🧼</button>
+            
+            <div class="separator"></div>
+
+            <input type="color" id="colorPicker" value="#000000" class="color-tool">
+            
+            <div class="slider-container">
+                <button id="sizeBtn" class="tool-btn" title="Taille">🎚️</button>
+                <div id="sizeValue">
+                    <input type="range" id="sizePicker" min="1" max="20" value="5">
+                </div>
+            </div>
+
+            <button id="eraseAllBtn" class="tool-btn" title="Effacer tout">🗑️</button>
+
+            <button id="resetZoom" class="tool-btn" title="Réinitialiser le zoom">🔍</button>
+        </div>
+    </div>
+    <div id="information" class="information">
+        100%
+    </div>
     <canvas id="whiteboard"></canvas>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/script.js"></script>

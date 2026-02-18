@@ -19,13 +19,6 @@ whiteboard.height = window.innerHeight;
 
 window.localHistory = []; //Stockage de l'historique local pour le panning, evite la charge server
 
-//Config Trait
-function style1(){
-    context.lineWidth = 2;
-    context.lineCap = 'round';
-    context.strokeStyle = 'blue';
-}
-
 
 let drawing = false;
 
@@ -44,7 +37,9 @@ let drawing = false;
             const data = {
                 x: (d.clientX - offSetCamera.x) / scale,
                 y: (d.clientY - offSetCamera.y) / scale,
-                newStroke: true
+                newStroke: true,
+                color: context.strokeStyle,
+                size: context.lineWidth
             };
             window.localHistory.push(data);
             socket.emit('drawing', data);
@@ -65,7 +60,9 @@ let drawing = false;
             const data = {
                 x: (d.clientX - offSetCamera.x) / scale,
                 y: (d.clientY - offSetCamera.y) / scale,
-                newStroke: false
+                newStroke: false,
+                color: context.strokeStyle,
+                size: context.lineWidth
             };
             window.localHistory.push(data);
             socket.emit('drawing', data);
@@ -95,6 +92,7 @@ let drawing = false;
         offSetCamera.y = mouseLocation.y - ((mouseLocation.y - offSetCamera.y) * ratio);
 
         scale = newScale;
+        updateInformation();
         renderAll();
     });
 
@@ -135,16 +133,131 @@ socket.on('init-history', (history) => {
 function renderAll() {
     context.clearRect(0, 0, whiteboard.width, whiteboard.height);
     context.save();
-    context.translate(offSetCamera.x, offSetCamera.y);//mouvement caméra
+    context.translate(offSetCamera.x, offSetCamera.y);
     context.scale(scale, scale);
-    
-    //Style du trait
-    style1();
+    grid();
 
-    if(window.localHistory){
-        window.localHistory.forEach((data) => {
-            draw(data.x, data.y, data.newStroke);
-        });
+    if (window.localHistory.length > 0) {
+        for (let i = 0; i < window.localHistory.length; i++) {
+            const point = window.localHistory[i];
+            
+            if (point.newStroke) {
+                context.beginPath();
+                context.moveTo(point.x, point.y);
+            } else {
+                const prevPoint = window.localHistory[i-1];
+                if (prevPoint) {
+                    context.beginPath();
+                    context.moveTo(prevPoint.x, prevPoint.y);
+                    context.lineTo(point.x, point.y);
+
+
+                    context.strokeStyle = point.color || '#000000';
+                    context.lineWidth = point.size || 5;
+                    context.lineCap = 'round';
+                    context.stroke();
+                }
+            }
+        }
     }
     context.restore();
+}
+
+function grid(){
+    const gridSize = 25;
+    const left = -offSetCamera.x / scale;
+    const top = -offSetCamera.y / scale;
+    const right = (whiteboard.width - offSetCamera.x) / scale;
+    const bottom = (whiteboard.height - offSetCamera.y) / scale;
+
+    context.strokeStyle = '#00000039';
+    context.lineWidth = 1;
+    context.beginPath();
+    for (let x = left - (left % gridSize); x < right; x += gridSize) {
+        context.moveTo(x, top);
+        context.lineTo(x, bottom);
+    }
+    for (let y = top - (top % gridSize); y < bottom; y += gridSize) {
+        context.moveTo(left, y);
+        context.lineTo(right, y);
+    }
+    context.stroke();
+}
+
+//Frontend
+const fabToolbar = document.getElementById('fab-toolbar');
+const fabTrigger = document.getElementById('fabTrigger');
+
+fabTrigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (fabToolbar.classList.contains('closed')) {
+        fabToolbar.classList.remove('closed');
+        fabToolbar.classList.add('open');
+    } else {
+        fabToolbar.classList.remove('open');
+        fabToolbar.classList.add('closed');
+    }
+});
+
+fabToolbar.addEventListener('mousedown', (e) => e.stopPropagation());
+
+// Boutons
+const penBtn = document.getElementById('penBtn');
+const eraserBtn = document.getElementById('eraserBtn');
+const colorInput = document.getElementById('colorPicker');
+const sizeInput = document.getElementById('sizePicker');
+const eraseAllBtn = document.getElementById('eraseAllBtn');
+const resetZoomBtn = document.getElementById('resetZoom');
+
+let currentTool = 'pen'; //Outil par défaut
+
+penBtn.addEventListener('click', () => {
+    currentTool = 'pen';
+    context.strokeStyle = colorInput.value;
+    updateUI();
+});
+
+eraserBtn.addEventListener('click', () => {
+    currentTool = 'eraser';
+    context.strokeStyle = '#ffffff';
+    updateUI();
+});
+
+colorInput.addEventListener('input', (e) => {
+    currentTool = 'pen';
+    context.strokeStyle = e.target.value;
+    updateUI();
+});
+
+sizeInput.addEventListener('input', (e) => {
+    context.lineWidth = e.target.value;
+});
+
+eraseAllBtn.addEventListener('click', () => {
+    window.localHistory = [];
+    socket.emit('drawing', { clear: true });
+    renderAll();
+});
+
+resetZoomBtn.addEventListener('click', () => {
+    scale = 1;
+    offSetCamera = { x: 0, y: 0 };
+    updateInformation();
+    renderAll();
+});
+
+function updateUI() {
+    if (currentTool === 'pen') {
+        penBtn.classList.add('active');
+        eraserBtn.classList.remove('active');
+    } else {
+        eraserBtn.classList.add('active');
+        penBtn.classList.remove('active');
+    }
+}
+
+const information = document.getElementById('information');
+function updateInformation() {
+    const zoomPercentage = Math.round(scale * 100);
+    information.textContent = `${zoomPercentage}%`;
 }
