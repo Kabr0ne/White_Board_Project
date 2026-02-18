@@ -256,8 +256,14 @@ function updateUI() {
     }
 }
 
-const information = document.getElementById('information');
+const zoomPourcent = document.getElementById('zoomPourcent');
 function updateInformation() {
     const zoomPercentage = Math.round(scale * 100);
-    information.textContent = `${zoomPercentage}%`;
+    zoomPourcent.textContent = `${zoomPercentage}%`;
 }
+
+const clientCompteur = document.getElementById('ClientCompteur');
+socket.on('update-client-count', (count) => {
+    clientCompteur.textContent = `${count} 👀`;
+});
+
