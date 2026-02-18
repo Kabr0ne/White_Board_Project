@@ -15,15 +15,15 @@
 
 ## Phase 2 : Interface & Outils (En cours)
 
-[ ] Palette de couleurs : Sélectionneur de couleurs (Noir, Rouge, Bleu, Vert, etc.).
+[X] Palette de couleurs : Sélectionneur de couleurs (Noir, Rouge, Bleu, Vert, etc.).
 
-[ ] Épaisseur du trait : Slider pour ajuster la taille du pinceau.
+[X] Épaisseur du trait : Slider pour ajuster la taille du pinceau.
 
-[ ] Outil Gomme : Mode effaçage pour corriger des zones précises.
+[X] Outil Gomme : Mode effaçage pour corriger des zones précises.
 
-[ ] Bouton "Clear All" : Nettoyage complet du tableau (synchronisé sur le serveur).
+[X] Bouton "Clear All" : Nettoyage complet du tableau (synchronisé sur le serveur).
 
-[ ] Indicateurs de présence : Voir le nombre d'utilisateurs connectés.
+[X] Indicateurs de présence : Voir le nombre d'utilisateurs connectés.
 
 ## Phase 3 : Fonctionnalités Avancées (À venir)
 
