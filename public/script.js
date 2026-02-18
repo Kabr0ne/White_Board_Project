@@ -92,6 +92,7 @@ let drawing = false;
         offSetCamera.y = mouseLocation.y - ((mouseLocation.y - offSetCamera.y) * ratio);
 
         scale = newScale;
+        updateInformation();
         renderAll();
     });
 
@@ -134,6 +135,7 @@ function renderAll() {
     context.save();
     context.translate(offSetCamera.x, offSetCamera.y);
     context.scale(scale, scale);
+    grid();
 
     if (window.localHistory.length > 0) {
         for (let i = 0; i < window.localHistory.length; i++) {
@@ -161,6 +163,27 @@ function renderAll() {
     context.restore();
 }
 
+function grid(){
+    const gridSize = 25;
+    const left = -offSetCamera.x / scale;
+    const top = -offSetCamera.y / scale;
+    const right = (whiteboard.width - offSetCamera.x) / scale;
+    const bottom = (whiteboard.height - offSetCamera.y) / scale;
+
+    context.strokeStyle = '#00000039';
+    context.lineWidth = 1;
+    context.beginPath();
+    for (let x = left - (left % gridSize); x < right; x += gridSize) {
+        context.moveTo(x, top);
+        context.lineTo(x, bottom);
+    }
+    for (let y = top - (top % gridSize); y < bottom; y += gridSize) {
+        context.moveTo(left, y);
+        context.lineTo(right, y);
+    }
+    context.stroke();
+}
+
 //Frontend
 const fabToolbar = document.getElementById('fab-toolbar');
 const fabTrigger = document.getElementById('fabTrigger');
@@ -184,6 +207,7 @@ const eraserBtn = document.getElementById('eraserBtn');
 const colorInput = document.getElementById('colorPicker');
 const sizeInput = document.getElementById('sizePicker');
 const eraseAllBtn = document.getElementById('eraseAllBtn');
+const resetZoomBtn = document.getElementById('resetZoom');
 
 let currentTool = 'pen'; //Outil par défaut
 
@@ -215,6 +239,13 @@ eraseAllBtn.addEventListener('click', () => {
     renderAll();
 });
 
+resetZoomBtn.addEventListener('click', () => {
+    scale = 1;
+    offSetCamera = { x: 0, y: 0 };
+    updateInformation();
+    renderAll();
+});
+
 function updateUI() {
     if (currentTool === 'pen') {
         penBtn.classList.add('active');
@@ -223,4 +254,10 @@ function updateUI() {
         eraserBtn.classList.add('active');
         penBtn.classList.remove('active');
     }
+}
+
+const information = document.getElementById('information');
+function updateInformation() {
+    const zoomPercentage = Math.round(scale * 100);
+    information.textContent = `${zoomPercentage}%`;
 }

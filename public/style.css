@@ -35,7 +35,7 @@ body {
 
 .fab-toolbar.open {
     width: 60px;
-    height: 320px;
+    height: 350px;
     border-radius: 50px;
     background-color: bisque;
 }
@@ -129,4 +129,25 @@ body {
 input[type=range] {
     width: 120px;
     cursor: pointer;
+}
+
+.information {
+    position: fixed;
+    align-items: center;
+    flex-direction: column;
+    display: flex;
+    justify-content: center;
+    top: 20px;
+    right: 20px;
+    background-color: #6e6c6cdd;
+    border-radius: 50%;
+    height: 60px;
+    width: 60px;
+    z-index: 1000;
+
+    /* Empeche toute interaction avec le texte */
+    pointer-events: none; 
+    user-select: none;
+
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
