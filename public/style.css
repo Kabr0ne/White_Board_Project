@@ -6,6 +6,7 @@ body {
     display: block; 
     background: #fff; 
     cursor: crosshair; 
+    touch-action: none;
 }
 
 .fab-toolbar {

@@ -100,6 +100,90 @@ let drawing = false;
     //Redimension de la fenêtre
     window.addEventListener('resize', onResize);
 
+    //Mobile Support
+    let lastTouchMidPoint = null;
+    let lastTouchDistance = 0;
+
+    whiteboard.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+            drawing = true;
+            const touchPos = getTouchPos(e);
+            const colorToSave = (currentTool === 'eraser') ? '#ffffff' : colorInput.value;
+            const data = {
+                x: (touchPos.x - offSetCamera.x) / scale,
+                y: (touchPos.y - offSetCamera.y) / scale,
+                newStroke: true,
+                color: colorToSave,
+                size: parseInt(sizeInput.value)
+            };
+            window.localHistory.push(data);
+            socket.emit('drawing', data);
+            renderAll();
+        } else if (e.touches.length === 2) {
+            drawing = false;
+            const touch1 = e.touches[0];
+            const touch2 = e.touches[1];
+            lastTouchDistance = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
+            lastTouchMidPoint = {
+                x: (touch1.clientX + touch2.clientX) / 2,
+                y: (touch1.clientY + touch2.clientY) / 2
+            };
+        }
+    });
+
+    whiteboard.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 1 && drawing) {
+            const touchPos = getTouchPos(e);
+            const colorToSave = (currentTool === 'eraser') ? '#ffffff' : colorInput.value;
+            const data = {
+                x: (touchPos.x - offSetCamera.x) / scale,
+                y: (touchPos.y - offSetCamera.y) / scale,
+                newStroke: false,
+                color: colorToSave,
+                size: parseInt(sizeInput.value)
+            };
+            window.localHistory.push(data);
+            socket.emit('drawing', data);
+            renderAll();
+        } 
+        else if (e.touches.length === 2) {
+            const touch1 = e.touches[0];
+            const touch2 = e.touches[1];
+            
+            const currentDistance = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
+            const currentMidPoint = {
+                x: (touch1.clientX + touch2.clientX) / 2,
+                y: (touch1.clientY + touch2.clientY) / 2
+            };
+
+            if (lastTouchDistance && lastTouchMidPoint) {
+                const zoomAmount = currentDistance / lastTouchDistance;
+                const newScale = Math.min(maxScale, Math.max(minScale, scale * zoomAmount));
+                const ratio = newScale / scale;
+
+                const dx = currentMidPoint.x - lastTouchMidPoint.x;
+                const dy = currentMidPoint.y - lastTouchMidPoint.y;
+
+                offSetCamera.x = currentMidPoint.x - ((currentMidPoint.x - offSetCamera.x) * ratio) + dx;
+                offSetCamera.y = currentMidPoint.y - ((currentMidPoint.y - offSetCamera.y) * ratio) + dy;
+
+                scale = newScale;
+                updateInformation();
+                renderAll();
+            }
+
+            lastTouchDistance = currentDistance;
+            lastTouchMidPoint = currentMidPoint;
+        }
+    });
+
+    whiteboard.addEventListener('touchend', () => {
+        drawing = false;
+        lastTouchDistance = 0;
+        lastTouchMidPoint = null;
+        context.beginPath();
+    });
+
 
 function draw(x, y, isNewStroke){
     if(isNewStroke){
@@ -120,6 +204,11 @@ function onResize() {
 }
 
 socket.on('drawing', (data) => {
+    if(data.clear) {
+        window.localHistory = [];
+        renderAll();
+        return;
+    }
     window.localHistory.push(data);
     renderAll();
 })
@@ -233,11 +322,16 @@ sizeInput.addEventListener('input', (e) => {
     context.lineWidth = e.target.value;
 });
 
-eraseAllBtn.addEventListener('click', () => {
-    window.localHistory = [];
-    socket.emit('drawing', { clear: true });
-    renderAll();
-});
+const eraseAll = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        window.localHistory = [];
+        socket.emit('drawing', { clear: true });
+        renderAll();
+}
+
+eraseAllBtn.addEventListener('click', eraseAll);
+eraseAllBtn.addEventListener('touchstart', eraseAll, { passive: false });
 
 resetZoomBtn.addEventListener('click', () => {
     scale = 1;
@@ -267,3 +361,12 @@ socket.on('update-client-count', (count) => {
     clientCompteur.textContent = `${count} 👀`;
 });
 
+
+//Mobile Support
+function getTouchPos(touchEvent) {
+    const rect = whiteboard.getBoundingClientRect();
+    return {
+        x: touchEvent.touches[0].clientX - rect.left,
+        y: touchEvent.touches[0].clientY - rect.top
+    };
+}
