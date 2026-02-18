@@ -25,7 +25,11 @@ io.on('connection', (user) => {
 
     //Broadcast vers tout les users sauf le dessinateur
     user.on('drawing', (data)=> {
-
+        if(data.clear) {
+            drawingHistory.length = 0;
+            user.broadcast.emit('drawing', { clear: true });
+            return;
+        }
         drawingHistory.push(data); //Ajout du dessin à l'historique 
         user.broadcast.emit('drawing', data);
         console.log(drawingHistory)
