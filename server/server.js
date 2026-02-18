@@ -37,10 +37,25 @@ io.on('connection', (user) => {
     })
 })
 
+io.on('disconnection', (user) => {
+    console.log(`Utilisateur déconnecté : ${user.id}`);
+})
+
+let connectedUsers = 0;
+io.on('connection', (socket) => {
+    connectedUsers++;
+    io.emit('update-client-count', connectedUsers);
+
+    socket.on('disconnect', () => {
+        connectedUsers--;
+        io.emit('update-client-count', connectedUsers);
+    });
+});
+
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 })
 
-server.listen(port, () => {
+server.listen(port, '0.0.0.0', () => {
     console.log(`Serveur démarré sur le port ${port}`);
 })
