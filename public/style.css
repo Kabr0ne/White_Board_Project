@@ -131,7 +131,7 @@ input[type=range] {
     cursor: pointer;
 }
 
-.information {
+.zoomPourcent {
     position: fixed;
     align-items: center;
     flex-direction: column;
@@ -139,6 +139,27 @@ input[type=range] {
     justify-content: center;
     top: 20px;
     right: 20px;
+    background-color: #6e6c6cdd;
+    border-radius: 50%;
+    height: 60px;
+    width: 60px;
+    z-index: 1000;
+
+    /* Empeche toute interaction avec le texte */
+    pointer-events: none; 
+    user-select: none;
+
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+.ClientCompteur {
+    position: fixed;
+    align-items: center;
+    flex-direction: column;
+    display: flex;
+    justify-content: center;
+    top: 20px;
+    right: 100px;
     background-color: #6e6c6cdd;
     border-radius: 50%;
     height: 60px;
