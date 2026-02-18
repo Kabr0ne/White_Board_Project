@@ -19,13 +19,6 @@ whiteboard.height = window.innerHeight;
 
 window.localHistory = []; //Stockage de l'historique local pour le panning, evite la charge server
 
-//Config Trait
-function style1(){
-    context.lineWidth = 2;
-    context.lineCap = 'round';
-    context.strokeStyle = 'blue';
-}
-
 
 let drawing = false;
 
@@ -44,7 +37,9 @@ let drawing = false;
             const data = {
                 x: (d.clientX - offSetCamera.x) / scale,
                 y: (d.clientY - offSetCamera.y) / scale,
-                newStroke: true
+                newStroke: true,
+                color: context.strokeStyle,
+                size: context.lineWidth
             };
             window.localHistory.push(data);
             socket.emit('drawing', data);
@@ -65,7 +60,9 @@ let drawing = false;
             const data = {
                 x: (d.clientX - offSetCamera.x) / scale,
                 y: (d.clientY - offSetCamera.y) / scale,
-                newStroke: false
+                newStroke: false,
+                color: context.strokeStyle,
+                size: context.lineWidth
             };
             window.localHistory.push(data);
             socket.emit('drawing', data);
@@ -151,8 +148,10 @@ function renderAll() {
                     context.beginPath();
                     context.moveTo(prevPoint.x, prevPoint.y);
                     context.lineTo(point.x, point.y);
-                    context.strokeStyle = point.color;
-                    context.lineWidth = point.size;
+
+
+                    context.strokeStyle = point.color || '#000000';
+                    context.lineWidth = point.size || 5;
                     context.lineCap = 'round';
                     context.stroke();
                 }
@@ -184,8 +183,9 @@ const penBtn = document.getElementById('penBtn');
 const eraserBtn = document.getElementById('eraserBtn');
 const colorInput = document.getElementById('colorPicker');
 const sizeInput = document.getElementById('sizePicker');
+const eraseAllBtn = document.getElementById('eraseAllBtn');
 
-let currentTool = 'pen';
+let currentTool = 'pen'; //Outil par défaut
 
 penBtn.addEventListener('click', () => {
     currentTool = 'pen';
@@ -207,6 +207,12 @@ colorInput.addEventListener('input', (e) => {
 
 sizeInput.addEventListener('input', (e) => {
     context.lineWidth = e.target.value;
+});
+
+eraseAllBtn.addEventListener('click', () => {
+    window.localHistory = [];
+    socket.emit('drawing', { clear: true });
+    renderAll();
 });
 
 function updateUI() {
