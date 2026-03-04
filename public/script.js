@@ -52,7 +52,7 @@ let drawing = false;
         socket.emit('draw-cursor', {line: {
             x: (d.clientX - offSetCamera.x) / scale, 
             y: (d.clientY - offSetCamera.y) / scale,
-            id: socket.id
+            id: myUsername
         }});
         
         if (isPanning) {
@@ -142,7 +142,7 @@ let drawing = false;
                 line: {
                     x: (touchPos.x - offSetCamera.x) / scale, 
                     y: (touchPos.y - offSetCamera.y) / scale,
-                    id: socket.id
+                    id: myUsername
                 }});
                 
             const colorToSave = (currentTool === 'eraser') ? '#ffffff' : colorInput.value;
@@ -393,7 +393,7 @@ function getCursorElement(id) {
         cursorElement.style.pointerEvents = 'none';
         const label = document.createElement('span');
         label.className = 'cursor-label';
-        label.innerText = id.substring(0, 5); //En attente des pseudos
+        label.innerText = id.substring(0, 5);
         cursorElement.appendChild(label);
         document.body.appendChild(cursorElement);
     }
@@ -402,6 +402,10 @@ function getCursorElement(id) {
 
 socket.on('draw-cursor', (data) => {
     const cursorElement = getCursorElement(data.id);
+    const label = cursorElement.querySelector('.cursor-label');
+    if (label) {
+        label.innerText = data.username;
+    }
     const x = data.line.x * scale + offSetCamera.x;
     const y = data.line.y * scale + offSetCamera.y;
     cursorElement.style.transform = `translate(${x}px, ${y}px)`;
@@ -413,3 +417,69 @@ socket.on('remove-cursor', (id) => {
         cursorElement.remove();
     }
 });
+
+//Overlay management
+const loginOverlay = document.getElementById('login-overlay');
+const usernameInput = document.getElementById('username');
+const roomInput = document.getElementById('room');
+const passwordInput = document.getElementById('password');
+const joinBtn = document.getElementById('joinBtn');
+const roomsList = document.getElementById('roomsList');
+
+let myUsername = 'Anonymous';
+let currentRoom = null;
+
+roomsList.addEventListener('click', (e) => {
+    if (e.target && e.target.tagName === 'LI') {
+        const roomName = e.target.innerText;
+        if (roomName != "No active room") {
+            roomInput.value = roomName;
+        }
+    }
+});
+
+function JoinRoom() {
+    const username = usernameInput.value.trim();
+    const room = roomInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    if(!username || !room) {
+        alert("Please enter a username and room name.");
+        return;
+    }
+    myUsername = username;
+    currentRoom = room;
+
+    socket.emit('join-room', {
+        username: myUsername,
+        room: currentRoom,
+        password: password
+    });
+}
+
+joinBtn.addEventListener('click', JoinRoom);
+
+socket.on('room-joined', (data) => {
+    if(data.success) {
+        loginOverlay.style.display = 'none';
+        console.log(`User ${myUsername} joined room: ${data.room}`);
+    } else {
+        alert(`Failed to join room: ${data.message}`);
+    }
+});
+
+socket.on('update-room-list', (rooms) => {
+    console.log("Received room list:", rooms);
+    if(!roomsList) {return;}
+    roomsList.innerHTML = '';
+    if(rooms.length === 0) {
+        roomsList.innerHTML = '<li>No active room</li>';
+    } else {
+        rooms.forEach(room => {
+            const li = document.createElement('li');
+            li.textContent = room;
+            roomsList.appendChild(li);
+        });
+    }
+});
+socket.emit('get-rooms');
