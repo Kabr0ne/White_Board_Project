@@ -13,7 +13,7 @@
 
 [x] Gestion de l'historique (Persistance) : Les nouveaux arrivants voient le dessin déjà existant.
 
-## Phase 2 : Interface & Outils (En cours)
+## Phase 2 : Interface & Outils (Terminé)
 
 [X] Palette de couleurs : Sélectionneur de couleurs (Noir, Rouge, Bleu, Vert, etc.).
 
@@ -25,9 +25,9 @@
 
 [X] Indicateurs de présence : Voir le nombre d'utilisateurs connectés.
 
-## Phase 3 : Fonctionnalités Avancées (À venir)
+## Phase 3 : Fonctionnalités Avancées (En cours)
 
-[ ] Curseurs distants : Voir la position de la souris des autres utilisateurs avec leur pseudo.
+[X] Curseurs distants : Voir la position de la souris des autres utilisateurs avec leur pseudo.
 
 [ ] Export d'image : Bouton pour télécharger le chef-d'œuvre au format .png.
 
