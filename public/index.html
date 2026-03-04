@@ -7,6 +7,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 </head>
 <body>
+    <div id="login-overlay">
+        <div class="login-box">
+            <h1>AllDraw.IO</h1>
+            <input type="text" id="username" placeholder="Type your username" maxlength="15">
+                <div class='login-content'>
+                    <div class="room-selection">
+                        <input type="text" id="room" placeholder="Type the room name">
+                        <input type="password" id="password" placeholder="Type the room password (optional)">
+                        <button id="joinBtn">Create/Join the room</button>
+                    </div>
+
+                    <div class="available-rooms">
+                        <h3>Available rooms:</h3>
+                        <div class="roomListContainer">
+                            <ul id="roomsList">
+                                <li>No active room</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
     <div id="fab-toolbar" class="fab-toolbar closed">
         
         <div class="fab-trigger" id="fabTrigger">
