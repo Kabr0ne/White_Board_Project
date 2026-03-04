@@ -231,7 +231,8 @@ socket.on('init-history', (history) => {
 });
 
 function renderAll() {
-    context.clearRect(0, 0, whiteboard.width, whiteboard.height);
+    context.fillStyle = "white";
+    context.fillRect(0, 0, whiteboard.width, whiteboard.height);
     context.save();
     context.translate(offSetCamera.x, offSetCamera.y);
     context.scale(scale, scale);
@@ -483,3 +484,12 @@ socket.on('update-room-list', (rooms) => {
     }
 });
 socket.emit('get-rooms');
+
+//ExportPNG section
+const exportBtn = document.getElementById('exportBtn');
+exportBtn.addEventListener('click', () => {
+    const link = document.createElement('a');
+    link.download = `whiteboard_${currentRoom || 'untitled'}.png`;
+    link.href = whiteboard.toDataURL();
+    link.click();
+});
