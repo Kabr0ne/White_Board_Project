@@ -29,7 +29,7 @@
 
 [X] Curseurs distants : Voir la position de la souris des autres utilisateurs avec leur pseudo.
 
-[ ] Export d'image : Bouton pour télécharger le chef-d'œuvre au format .png.
+[X] Export d'image : Bouton pour télécharger le chef-d'œuvre au format .png.
 
 [X] Système de "Rooms" : Possibilité de créer différents salons privés pour dessiner à plusieurs groupes.
 
