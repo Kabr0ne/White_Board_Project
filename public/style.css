@@ -173,3 +173,17 @@ input[type=range] {
 
     font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
+
+.cursor {
+    position: absolute;
+    background-image: url('img/cursor.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-color: transparent;
+    top: 0;
+    left: 0;
+    width: 32px;
+    height: 32px;
+    z-index: 1001;
+    pointer-events: none;
+}
