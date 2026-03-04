@@ -391,6 +391,10 @@ function getCursorElement(id) {
         cursorElement.id = elementid;
         cursorElement.className = 'cursor';
         cursorElement.style.pointerEvents = 'none';
+        const label = document.createElement('span');
+        label.className = 'cursor-label';
+        label.innerText = id.substring(0, 5); //En attente des pseudos
+        cursorElement.appendChild(label);
         document.body.appendChild(cursorElement);
     }
     return cursorElement;
