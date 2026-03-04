@@ -31,7 +31,7 @@
 
 [ ] Export d'image : Bouton pour télécharger le chef-d'œuvre au format .png.
 
-[ ] Système de "Rooms" : Possibilité de créer différents salons privés pour dessiner à plusieurs groupes.
+[X] Système de "Rooms" : Possibilité de créer différents salons privés pour dessiner à plusieurs groupes.
 
 [ ] Formes géométriques : Outils pour tracer des lignes droites, des cercles et des rectangles.
 
