@@ -32,7 +32,6 @@ let drawing = false;
             lastMousePosition = { x: d.clientX - offSetCamera.x, y: d.clientY - offSetCamera.y };
         }
         if (d.button === 0){
-            console.log("début du dessin")
             drawing = true;
             const data = {
                 x: (d.clientX - offSetCamera.x) / scale,
@@ -50,6 +49,12 @@ let drawing = false;
 
     //Mouvement-Souris
     whiteboard.addEventListener('mousemove', (d) => {
+        socket.emit('draw-cursor', {line: {
+            x: (d.clientX - offSetCamera.x) / scale, 
+            y: (d.clientY - offSetCamera.y) / scale,
+            id: socket.id
+        }});
+        
         if (isPanning) {
             offSetCamera.x = d.clientX - lastMousePosition.x;
             offSetCamera.y = d.clientY - lastMousePosition.y;
@@ -74,7 +79,6 @@ let drawing = false;
     whiteboard.addEventListener('mouseup', (d) => {
         if(d.button === 1){ isPanning = false; }
         if(d.button === 0){
-            console.log("fin du dessin")
             drawing = false;
             context.beginPath();
         }
@@ -134,6 +138,13 @@ let drawing = false;
     whiteboard.addEventListener('touchmove', (e) => {
         if (e.touches.length === 1 && drawing) {
             const touchPos = getTouchPos(e);
+            socket.emit('draw-cursor', {
+                line: {
+                    x: (touchPos.x - offSetCamera.x) / scale, 
+                    y: (touchPos.y - offSetCamera.y) / scale,
+                    id: socket.id
+                }});
+                
             const colorToSave = (currentTool === 'eraser') ? '#ffffff' : colorInput.value;
             const data = {
                 x: (touchPos.x - offSetCamera.x) / scale,
@@ -370,3 +381,35 @@ function getTouchPos(touchEvent) {
         y: touchEvent.touches[0].clientY - rect.top
     };
 }
+
+//Cursor management
+function getCursorElement(id) {
+    let elementid = "cursor-" + id;
+    let cursorElement = document.getElementById(elementid);
+    if (!cursorElement) {
+        cursorElement = document.createElement('div');
+        cursorElement.id = elementid;
+        cursorElement.className = 'cursor';
+        cursorElement.style.pointerEvents = 'none';
+        const label = document.createElement('span');
+        label.className = 'cursor-label';
+        label.innerText = id.substring(0, 5); //En attente des pseudos
+        cursorElement.appendChild(label);
+        document.body.appendChild(cursorElement);
+    }
+    return cursorElement;
+}
+
+socket.on('draw-cursor', (data) => {
+    const cursorElement = getCursorElement(data.id);
+    const x = data.line.x * scale + offSetCamera.x;
+    const y = data.line.y * scale + offSetCamera.y;
+    cursorElement.style.transform = `translate(${x}px, ${y}px)`;
+});
+
+socket.on('remove-cursor', (id) => {
+    const cursorElement = document.getElementById("cursor-" + id);
+    if (cursorElement) {
+        cursorElement.remove();
+    }
+});
