@@ -493,3 +493,46 @@ exportBtn.addEventListener('click', () => {
     link.href = whiteboard.toDataURL();
     link.click();
 });
+
+//Chat section
+const chatContainer = document.getElementById('chat-container');
+chatContainer.style.display = 'none'; //Disable chat au lancement
+
+const openChatBtn = document.getElementById('open-chat-btn');
+const chatInput = document.getElementById('chat-input');
+const sendChatBtn = document.getElementById('send-chat');
+const chatMessages = document.getElementById('chat-messages');
+const closeChatBtn = document.getElementById('close-chat');
+
+openChatBtn.addEventListener('click', () => {
+    chatContainer.style.display = 'flex';
+    openChatBtn.style.display = 'none';
+});
+
+closeChatBtn.addEventListener('click', () => {
+    chatContainer.style.display = 'none';
+    openChatBtn.style.display = 'block';
+});
+
+function addChatMessage() {
+    const message = chatInput.value.trim();
+    if(message && currentRoom) {
+        socket.emit('send-chat', message);
+        chatInput.value = '';
+    }
+}
+
+sendChatBtn.onclick = addChatMessage;
+chatInput.addEventListener('keypress', (e) => {
+    if(e.key === 'Enter') {
+        addChatMessage();
+    }
+});
+
+socket.on('received-chat', (data) => {
+    const messageElement = document.createElement('div');
+    messageElement.className = `message ${data.id === socket.id ? 'my-message' : ''}`;
+    messageElement.innerHTML = `<strong>${data.username}:</strong> ${data.message}`;
+    chatMessages.appendChild(messageElement);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+});

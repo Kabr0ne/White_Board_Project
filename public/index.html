@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 </head>
 <body>
+    
     <div id="login-overlay">
         <div class="login-box">
             <h1>AllDraw.IO</h1>
@@ -29,6 +30,7 @@
                 </div>
         </div>
     </div>
+
     <div id="fab-toolbar" class="fab-toolbar closed">
         
         <div class="fab-trigger" id="fabTrigger">
@@ -58,13 +60,32 @@
             <button id="exportBtn" class="tool-btn" title="Exporter en PNG">💾</button>
         </div>
     </div>
+
     <div id="zoomPourcent" class="zoomPourcent">
         100%
     </div>
+
     <div id="ClientCompteur" class="ClientCompteur">
         0 👀
     </div>
+
+    <div id="chat-container" class="chat-closed">
+        <div id="chat-header">
+            <span>In Room Chat</span>
+            <button id="close-chat">x</button>
+        </div>
+        <div id="chat-messages">
+            Welcome to the chat! Say hi to other participants.
+        </div>
+        <div id="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Write a message...">
+            <button id="send-chat">➡️</button>
+        </div>
+    </div>
+    <button id="open-chat-btn" title="Ouvrir le chat">💬</button>
     <canvas id="whiteboard"></canvas>
+
+
     <script src="/socket.io/socket.io.js"></script>
     <script src="/script.js"></script>
 </body>
