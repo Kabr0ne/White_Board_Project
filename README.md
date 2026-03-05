@@ -35,4 +35,4 @@
 
 [ ] Formes géométriques : Outils pour tracer des lignes droites, des cercles et des rectangles.
 
-[ ] Chat textuel : Un petit espace de discussion à côté du tableau.
+[X] Chat textuel : Un petit espace de discussion à côté du tableau.
