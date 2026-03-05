@@ -106,7 +106,20 @@ io.on('connection', (user) => {
             }
         }
     })
+
+    user.on('send-chat', (message) => {
+        const room = user.currentRoom;
+        if(room) {
+            io.to(room).emit('received-chat', {
+                message: message,
+                username: user.username,
+                id: user.id
+            });
+        }
+    });
+
 })
+
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
